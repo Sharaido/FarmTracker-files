@@ -1,0 +1,40 @@
+ALTER PROC InsertEntityForFP
+@CUID int,
+@PUID uniqueidentifier,
+@ID nvarchar(50),
+@NAME nvarchar(50),
+@DESCRIPTION nvarchar(max),
+@COUNT int,
+@PURCHASED_DATE datetime,
+@COST money,
+@CREATED_BY_UUID uniqueidentifier
+AS
+BEGIN
+	DECLARE @FARM_OWNER_UUID uniqueidentifier
+	SELECT @FARM_OWNER_UUID = F.createdByUUID FROM farms AS F
+	INNER JOIN farmProperties AS P ON F.FUID = P.FUID
+	WHERE P.PUID = @PUID
+
+	DECLARE @OWNER_ENTITY_LIMIT int 
+	SELECT @OWNER_ENTITY_LIMIT = T.entityLimit FROM users AS U 
+	INNER JOIN memberType T ON U.MTUID = T.MTUID
+	WHERE U.UUID = @FARM_OWNER_UUID
+
+	DECLARE @OWNER_ENTITY_NUMBER int
+	SELECT @OWNER_ENTITY_NUMBER = COUNT(E.EUID) FROM entityOfFP AS E
+	INNER JOIN farmProperties AS P ON P.PUID = E.PUID
+	INNER JOIN farms AS F ON P.FUID = F.FUID
+	WHERE F.createdByUUID = @FARM_OWNER_UUID
+	
+	IF (@OWNER_ENTITY_NUMBER < @OWNER_ENTITY_LIMIT)
+	BEGIN
+		INSERT INTO entityOfFP(CUID, PUID, ID, name, description, count, purchasedDate, cost, createdByUUID)
+		OUTPUT inserted.*
+		VALUES(@CUID, @PUID, @ID, @NAME, @DESCRIPTION, @COUNT, @PURCHASED_DATE, @COST, @CREATED_BY_UUID)
+	END
+	ELSE
+	BEGIN
+		SELECT TOP(0) * FROM entityOfFP
+	END 
+
+END
