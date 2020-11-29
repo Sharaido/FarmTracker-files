@@ -1,7 +1,7 @@
-CREATE PROC InsertFarmProperty
+ALTER PROC InsertFarmProperty
 @NAME nvarchar(50),
 @DESCRIPTION nvarchar(max),
-@TUID int,
+@CUID int,
 @FUID uniqueidentifier,
 @CREATED_BY_UUID uniqueidentifier
 AS
@@ -22,9 +22,9 @@ BEGIN
 	
 	IF (@OWNER_PROPERTY_NUMBER < @OWNER_PROPERTY_LIMIT)
 	BEGIN
-		INSERT INTO farmProperties(name, description, TUID, FUID, createdByUUID)
+		INSERT INTO farmProperties(name, description, CUID, FUID, createdByUUID)
 		OUTPUT inserted.*
-		VALUES(@NAME, @DESCRIPTION, @TUID, @FUID, @CREATED_BY_UUID)
+		VALUES(@NAME, @DESCRIPTION, @CUID, @FUID, @CREATED_BY_UUID)
 	END
 	ELSE
 	BEGIN

@@ -1,4 +1,4 @@
-CREATE PROC SelectPropertiesOfTheCategory
+ALTER PROC SelectPropertiesOfTheCategory
 @CUID int
 AS
 BEGIN
@@ -25,6 +25,7 @@ BEGIN
 		SELECT TOP(1) @CURRENT_ID = id FROM @TOP_CATEGORY_IDS WHERE iter = 0
 	END
 
+	--SELECT P.*, T.name as typeName FROM @PROPERTIES as P
+	--INNER JOIN COPTypes as T  ON P.TUID = T.TUID
 	SELECT * FROM @PROPERTIES
-
 END
