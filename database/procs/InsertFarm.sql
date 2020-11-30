@@ -1,4 +1,4 @@
-CREATE PROC InsertFarm
+ALTER PROC InsertFarm
 @NAME nvarchar(50),
 @DESCRIPTION nvarchar(max),
 @CREATED_BY_UUID uniqueidentifier
@@ -11,7 +11,7 @@ BEGIN
 
 	DECLARE @USER_FARM_NUMBER int
 	SELECT @USER_FARM_NUMBER = COUNT(F.FUID) FROM farms AS F
-	WHERE createdByUUID = @CREATED_BY_UUID
+	WHERE createdByUUID = @CREATED_BY_UUID AND deletedFlag != 1
 	
 	IF (@USER_FARM_NUMBER < @USER_FARM_LIMIT)
 	BEGIN
