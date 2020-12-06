@@ -25,6 +25,9 @@ BEGIN
 		INSERT INTO farmProperties(name, description, CUID, FUID, createdByUUID)
 		OUTPUT inserted.*
 		VALUES(@NAME, @DESCRIPTION, @CUID, @FUID, @CREATED_BY_UUID)
+
+		UPDATE farms SET lastModifiedDate = GETUTCDATE()
+		WHERE FUID = @FUID
 	END
 	ELSE
 	BEGIN

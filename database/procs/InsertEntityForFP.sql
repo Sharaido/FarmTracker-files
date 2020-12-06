@@ -31,6 +31,14 @@ BEGIN
 		INSERT INTO entityOfFP(CUID, PUID, ID, name, description, count, purchasedDate, cost, createdByUUID)
 		OUTPUT inserted.*
 		VALUES(@CUID, @PUID, @ID, @NAME, @DESCRIPTION, @COUNT, @PURCHASED_DATE, @COST, @CREATED_BY_UUID)
+
+		UPDATE farmProperties SET lastModifiedDate = GETUTCDATE()
+		WHERE PUID = @PUID
+	
+		DECLARE @FUID uniqueidentifier
+		SELECT @FUID = FUID FROM farmProperties WHERE PUID = @PUID 
+		UPDATE farms SET lastModifiedDate = GETUTCDATE()
+		WHERE FUID = @FUID
 	END
 	ELSE
 	BEGIN
