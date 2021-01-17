@@ -1,0 +1,43 @@
+ALTER PROC SelectRemaindersForUUID
+@UUID uniqueidentifier
+AS
+BEGIN
+	SELECT * 
+	INTO #TEMP_FARMS
+	FROM farms
+	WHERE createdByUUID = @UUID
+
+	SELECT *
+	INTO #TEMP_COLLABORATORS
+	FROM collaborators
+	WHERE UUID = @UUID
+	
+	DECLARE @FUID uniqueidentifier
+	SELECT TOP(1) @FUID = FUID FROM #TEMP_COLLABORATORS
+	WHILE @FUID IS NOT NULL
+	BEGIN
+		INSERT INTO #TEMP_FARMS
+		SELECT * FROM farms 
+		WHERE FUID = @FUID
+
+		DELETE #TEMP_COLLABORATORS WHERE FUID = @FUID
+		SET @FUID = NULL
+		SELECT TOP(1) @FUID = FUID FROM #TEMP_COLLABORATORS
+	END
+
+	SELECT * FROM entityDetails 
+	WHERE 
+	EUID IN (SELECT EUID FROM entityOfFP
+		WHERE PUID IN (SELECT PUID FROM farmProperties
+				WHERE FUID IN (SELECT FUID FROM #TEMP_FARMS WHERE deletedFlag = 0 OR deletedFlag = NULL)
+				AND deletedFlag = 0 OR deletedFlag = NULL
+			)
+		AND deletedFlag = 0 OR deletedFlag = NULL
+		)
+	AND remainderDate IS NOT NULL
+	AND deletedFlag = 0 OR deletedFlag = NULL
+	ORDER BY remainderCompletedDate DESC, createdDate DESC
+
+	DROP TABLE #TEMP_FARMS
+	DROP TABLE #TEMP_COLLABORATORS
+END
